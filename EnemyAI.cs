@@ -298,12 +298,12 @@ public class EnemyAI : MonoBehaviour
     
     private void AnimationTriggerHelper(string animToPlay)
     {
-        for (int i = 0; i < numberOfHitAnims - 1; i++)
+        for (int i = 0; i < numberOfHitAnims; i++)
         {
             animator.SetBool("gethit" + (i + 1), false);
         }
 
-        for (int i = 0; i < attackDamage.Length - 1; i++)
+        for (int i = 0; i < attackDamage.Length; i++)
         {
             animator.SetBool("attack" + (i + 1), false);
         }
