@@ -278,13 +278,6 @@ public class EnemyAI : MonoBehaviour
             audio.PlayOneShot(painSounds[randomClip]);
             StartCoroutine(PainSoundCooldown(painSounds[randomClip].length));
         }
-
-        //if ((float)playDamageAnim > 0)
-        //{
-        //    enemyState = EnemyState.TakenDamage;
-        //    AnimationTriggerHelper("gethit" + Random.Range(1, numberOfHitAnims));
-        //    StartCoroutine(DamageAnimationDuration((float)playDamageAnim));
-        //}
     }
 
     public void AlertEnemy()
