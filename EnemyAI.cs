@@ -4,7 +4,10 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    [SerializeField, Tooltip("Ranges to engage the player")]
+    [SerializeField, Tooltip("How much rage the player gains from killing this")]
+    private float rageGain;
+
+    [SerializeField, Tooltip("Range to engage the player")]
     private float sightRange, attackRange;
 
     [SerializeField, Tooltip("How far the AI will search for a new random patrol location")]
@@ -72,7 +75,7 @@ public class EnemyAI : MonoBehaviour
 
     private NavMeshAgent agent;
 
-    private Transform player;
+    private Transform playerTransform;
 
     private Animator animator;
 
@@ -82,15 +85,21 @@ public class EnemyAI : MonoBehaviour
 
     private AudioSource audio;
 
+    private PlayerRage playerRage;
+
     private Vector3 walkPoint;
 
     private bool playerInSightRange, playerInAttackRange, patrolPointSet, isAttacking, threatenSoundPlayed, painSoundPlaying, idleSoundPlaying, footstepSoundPlaying;
+
+    private string currentAnimation;
 
     private const float LogicLoopInterval = 0.05f;
 
     private void Awake()
     {
-        player = GameObject.Find("Player").transform;
+        GameObject player = GameObject.Find("Player");
+        playerTransform = player.transform;
+        playerRage = player.GetComponent<PlayerRage>();
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         sphereCollider = GetComponent<CapsuleCollider>();
@@ -202,7 +211,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         agent.speed = runSpeed;
-        agent.SetDestination(player.position);
+        agent.SetDestination(playerTransform.position);
         AnimationTriggerHelper("run");
     }
 
@@ -212,7 +221,7 @@ public class EnemyAI : MonoBehaviour
         {
             isAttacking = true;
             agent.SetDestination(transform.position);
-            transform.LookAt(player);
+            transform.LookAt(playerTransform);
             int attackId = Random.Range(0, (attackDamage.Length - 1));
             AnimationTriggerHelper("attack" + (attackId + 1));
             StartCoroutine(AttackSphere(attackDamage[attackId], attackTiming[attackId]));
@@ -223,7 +232,7 @@ public class EnemyAI : MonoBehaviour
     private IEnumerator AttackSphere(float damage, float timing)
     {
         yield return new WaitForSeconds(timing);
-        Collider[] hitPlayer = Physics.OverlapSphere(attackPosition.position, (attackRange / 3), playerLayer);
+        Collider[] hitPlayer = Physics.OverlapSphere(attackPosition.position, (attackRange / 2.5f), playerLayer);
         foreach (Collider player in hitPlayer)
         {
             player.GetComponent<PlayerHealth>().TakeDamage(damage);
@@ -237,23 +246,28 @@ public class EnemyAI : MonoBehaviour
         isAttacking = false;
     }
 
-    private void Dead()
+    private void Dead(bool? gainRageFromKill = true)
     {
         audio.PlayOneShot(deathSounds[Random.Range(0, deathSounds.Length)]);
         rigidbody.freezeRotation = true;
         rigidbody.isKinematic = true;
         AnimationTriggerHelper("death" + Random.Range(1, numberOfDeathAnims));
         sphereCollider.enabled = false;
+
+        if ((bool)gainRageFromKill)
+            playerRage.AddRage(rageGain);
+
+        agent.SetDestination(transform.position);
     }
 
-    public void TakeDamage(float damage, float? playDamageAnim = 0)
+    public void TakeDamage(float damage, bool? gainRageFromKill = true)
     {
         hitPoints -= damage;
 
         if (hitPoints <= 0)
         {
             enemyState = EnemyState.Dead;
-            Dead();
+            Dead(gainRageFromKill);
             return;
         }
 
@@ -265,12 +279,17 @@ public class EnemyAI : MonoBehaviour
             StartCoroutine(PainSoundCooldown(painSounds[randomClip].length));
         }
 
-        if ((float)playDamageAnim > 0)
-        {
-            enemyState = EnemyState.TakenDamage;
-            AnimationTriggerHelper("gethit" + Random.Range(1, numberOfHitAnims));
-            StartCoroutine(DamageAnimationDuration((float)playDamageAnim));
-        }
+        //if ((float)playDamageAnim > 0)
+        //{
+        //    enemyState = EnemyState.TakenDamage;
+        //    AnimationTriggerHelper("gethit" + Random.Range(1, numberOfHitAnims));
+        //    StartCoroutine(DamageAnimationDuration((float)playDamageAnim));
+        //}
+    }
+
+    public void AlertEnemy()
+    {
+        sightRange = 1000f;
     }
 
     private IEnumerator FootStepsSoundCooldown(float duration)
@@ -295,22 +314,14 @@ public class EnemyAI : MonoBehaviour
         yield return new WaitForSeconds(duration);
         enemyState = EnemyState.Chasing;
     }
-    
+
     private void AnimationTriggerHelper(string animToPlay)
     {
-        for (int i = 0; i < numberOfHitAnims; i++)
-        {
-            animator.SetBool("gethit" + (i + 1), false);
-        }
+        if (currentAnimation != null)
+            animator.SetBool(currentAnimation, false);
 
-        for (int i = 0; i < attackDamage.Length; i++)
-        {
-            animator.SetBool("attack" + (i + 1), false);
-        }
-
-        animator.SetBool("walk", false);
-        animator.SetBool("run", false);
         animator.SetBool(animToPlay, true);
+        currentAnimation = animToPlay;
     }
 
     private void OnDrawGizmosSelected()
@@ -320,6 +331,6 @@ public class EnemyAI : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, sightRange);
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(attackPosition.transform.position, (attackRange / 3));
+        Gizmos.DrawWireSphere(attackPosition.transform.position, (attackRange / 2.5f));
     }
 }
