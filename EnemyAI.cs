@@ -93,7 +93,7 @@ public class EnemyAI : MonoBehaviour
 
     private string currentAnimation;
 
-    private const float LogicLoopInterval = 0.05f;
+    private int updateInterval = 3;
 
     private void Awake()
     {
@@ -119,8 +119,10 @@ public class EnemyAI : MonoBehaviour
         StartCoroutine(LogicLoop());
     }
 
-    private IEnumerator LogicLoop()
+    private void Update()
     {
+        if (Time.frameCount % this.updateInterval != 0) return;
+        
         if (enemyState != EnemyState.Dead)
         {
             playerInSightRange = Physics.CheckSphere(transform.position, sightRange, playerLayer);
