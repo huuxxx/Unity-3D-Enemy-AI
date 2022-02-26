@@ -116,7 +116,7 @@ public class EnemyAI : MonoBehaviour
 
     private void Update()
     {
-        if (Time.frameCount % this.updateInterval != 0) return;
+        if (Time.frameCount % updateInterval != 0) return;
         
         if (enemyState != EnemyState.Dead)
         {
