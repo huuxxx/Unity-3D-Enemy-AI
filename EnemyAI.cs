@@ -127,24 +127,18 @@ public class EnemyAI : MonoBehaviour
             {
                 enemyState = EnemyState.Attacking;
                 Attacking();
-                yield return new WaitForSeconds(LogicLoopInterval);
-                StartCoroutine(LogicLoop());
             }
             
             if (playerInSightRange && !playerInAttackRange)
             {
                 enemyState = EnemyState.Chasing;
                 Chasing();
-                yield return new WaitForSeconds(LogicLoopInterval);
-                StartCoroutine(LogicLoop());
             }
             
             if (!playerInSightRange && !playerInAttackRange)
             {
                 enemyState = EnemyState.Patroling;
                 Patroling();
-                yield return new WaitForSeconds(LogicLoopInterval);
-                StartCoroutine(LogicLoop());
             }
         }
     }
