@@ -114,11 +114,6 @@ public class EnemyAI : MonoBehaviour
         footstepSoundPlaying = false;
     }
 
-    private void Start()
-    {
-        StartCoroutine(LogicLoop());
-    }
-
     private void Update()
     {
         if (Time.frameCount % this.updateInterval != 0) return;
