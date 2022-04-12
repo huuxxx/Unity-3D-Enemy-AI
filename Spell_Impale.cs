@@ -14,19 +14,19 @@ public class Spell_Impale : MonoBehaviour
 
     [SerializeField, Tooltip("Randomness in spawn positioning of individual spikes"), Range(0.5f, 2)]
     private float positionOffset;
+    
+    [SerializeField, Tooltip("Target for the spell to be cast at")]
+    private GameObject spellTargetObject;
 
     [SerializeField]
     private GameObject spikePrefab;
-
-    private GameObject playerObj;
+    
     private float spellTimer, startSpeed, spawnDur, impaleDamage;
-    private Vector3 playerPosition;
-    private Vector3 originalPosition;
+    private Vector3 originalPosition, spellTargetPosition;
 
     private void Start()
     {
         originalPosition = transform.position;
-        playerObj = GameObject.Find("Player");
     }
 
     public void CastImpale(float damage)
@@ -34,10 +34,15 @@ public class Spell_Impale : MonoBehaviour
         impaleDamage = damage;
         startSpeed = speed;
         spawnDur = spawnDuration;
-        playerPosition = playerObj.transform.position;
+        spellTargetPosition = spellTargetObject.transform.position;
         transform.position = originalPosition;
-        transform.LookAt(playerObj.transform);
+        transform.LookAt(spellTargetPosition);
         spellTimer = 0;
+    }
+    
+    public void SetTarget(GameObject target)
+    {
+        spellTargetObject = target;
     }
 
     private void Update()
@@ -46,7 +51,7 @@ public class Spell_Impale : MonoBehaviour
         transform.position += transform.forward * (startSpeed * Time.deltaTime);
         spellTimer += Time.deltaTime;
 
-        Vector3 direction = transform.position - playerPosition;
+        Vector3 direction = transform.position - spellTarget;
         float distance = direction.magnitude;
 
         if (distance > spawnRate && spawnDur > 0)
@@ -73,7 +78,7 @@ public class Spell_Impale : MonoBehaviour
                 }
             }
 
-            playerPosition = transform.position;
+            spellTargetPosition = transform.position;
         }
     }
 }
