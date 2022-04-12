@@ -31,6 +31,11 @@ public class Spell_Impale : MonoBehaviour
     {
         originalPosition = transform.position;
     }
+    
+    public void SetTarget(GameObject target)
+    {
+        targetObj = target;
+    }
 
     public void CastImpale(float damage)
     {
