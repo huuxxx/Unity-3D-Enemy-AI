@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 public class Spell_Impale : MonoBehaviour
 {
@@ -14,15 +13,19 @@ public class Spell_Impale : MonoBehaviour
 
     [SerializeField, Tooltip("Randomness in spawn positioning of individual spikes"), Range(0.5f, 2)]
     private float positionOffset;
-    
-    [SerializeField, Tooltip("Target for the spell to be cast at")]
-    private GameObject spellTargetObject;
+
+    [SerializeField, Tooltip("Target Game Object")]
+    private GameObject targetObj;
+
+    [SerializeField, Tooltip("Layer assigned to the target")]
+    private LayerMask targetLayer;
 
     [SerializeField]
     private GameObject spikePrefab;
-    
+
     private float spellTimer, startSpeed, spawnDur, impaleDamage;
-    private Vector3 originalPosition, spellTargetPosition;
+    private Vector3 targetPosition;
+    private Vector3 originalPosition;
 
     private void Start()
     {
@@ -34,15 +37,10 @@ public class Spell_Impale : MonoBehaviour
         impaleDamage = damage;
         startSpeed = speed;
         spawnDur = spawnDuration;
-        spellTargetPosition = spellTargetObject.transform.position;
+        targetPosition = targetObj.transform.position;
         transform.position = originalPosition;
-        transform.LookAt(spellTargetPosition);
+        transform.LookAt(targetObj.transform);
         spellTimer = 0;
-    }
-    
-    public void SetTarget(GameObject target)
-    {
-        spellTargetObject = target;
     }
 
     private void Update()
@@ -51,7 +49,7 @@ public class Spell_Impale : MonoBehaviour
         transform.position += transform.forward * (startSpeed * Time.deltaTime);
         spellTimer += Time.deltaTime;
 
-        Vector3 direction = transform.position - spellTarget;
+        Vector3 direction = transform.position - targetPosition;
         float distance = direction.magnitude;
 
         if (distance > spawnRate && spawnDur > 0)
@@ -67,6 +65,11 @@ public class Spell_Impale : MonoBehaviour
                 GameObject craterInstance = Instantiate(spikePrefab, targetPosition, Quaternion.identity);
                 ParticleSystem craterParticle = craterInstance.GetComponent<ParticleSystem>();
 
+                if (Physics.CheckSphere(targetPosition, 1, targetLayer))
+                {
+                    // Deal damage to your target here
+                }
+
                 if (craterParticle != null)
                 {
                     Destroy(craterInstance, craterParticle.main.duration);
@@ -78,7 +81,7 @@ public class Spell_Impale : MonoBehaviour
                 }
             }
 
-            spellTargetPosition = transform.position;
+            targetPosition = transform.position;
         }
     }
 }
