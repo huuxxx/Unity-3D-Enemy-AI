@@ -26,9 +26,11 @@ public class Spell_Impale : MonoBehaviour
     private float spellTimer, startSpeed, spawnDur, impaleDamage;
     private Vector3 targetPosition;
     private Vector3 originalPosition;
+    private bool hasTakenDamage;
 
     private void Start()
     {
+        hasTakenDamage = false;
         originalPosition = transform.position;
     }
     
@@ -39,6 +41,7 @@ public class Spell_Impale : MonoBehaviour
 
     public void CastImpale(float damage)
     {
+        hasTakenDamage = false;
         impaleDamage = damage;
         startSpeed = speed;
         spawnDur = spawnDuration;
@@ -70,8 +73,9 @@ public class Spell_Impale : MonoBehaviour
                 GameObject craterInstance = Instantiate(spikePrefab, targetPosition, Quaternion.identity);
                 ParticleSystem craterParticle = craterInstance.GetComponent<ParticleSystem>();
 
-                if (Physics.CheckSphere(targetPosition, 1, targetLayer))
+                if (Physics.CheckSphere(targetPosition, 1, targetLayer) && !hasTakenDamage)
                 {
+                    hasTakenDamage = true;
                     // Deal damage to your target here
                 }
 
