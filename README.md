@@ -1,1 +1,3 @@
-# Unity-3D-Enemy-AI
+# Unity-3D-Scripts
+
+Generic scripts that can be used within Unity game engine.
