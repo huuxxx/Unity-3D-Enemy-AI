@@ -9,7 +9,7 @@ public static class Helpers
         return result;
     }
 
-    public static bool IsLocationPathable(Transform targetLocation, float? searchRadius = 30f)
+    public static bool IsLocationPathable(Transform targetLocation, float? searchRadius = 3f)
     {
         if (NavMesh.SamplePosition(targetLocation.position, out NavMeshHit target, (float)searchRadius, NavMesh.AllAreas))
         {
